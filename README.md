@@ -39,6 +39,8 @@ $ pip install kaggle
 - `pip install kaggle`로 kaggle 다운로드
 
   
+      
+
 
 <p align="center"><img src="images/1.png" border="1"></p>
 
