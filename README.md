@@ -165,20 +165,119 @@ train_data = pd.read_csv("/home/ines/ml_assignment/train.csv")
 train_data.head()
 ```
 
+사진
+
 ```python
 train_data.info()
 ```
 
-```python
-train_data.corr()
-```
+사진
 
 ```python
 train_data.describe()
 ```
 
+사진
+
 ```python
 train_data.hist(bins=50, figsize=(20,15))
 plt.show()
 ```
+
+사진
+
+
+
+```python
+def makeTitle(data):
+    data['Title'] = data['Name'].str.extract(' ([A-Za-z]+)\.', expand = False)
+
+makeTitle(test_data)
+makeTitle(train_data)
+```
+
+이름에 붙어있는 `Mr`, `Mrs` 같은 수식어를 추출해서 `Title`이라는 새로운 Column을 Training data와 test_data에 만들었다. `value_counts()`로 확인한 결과는 다음과 같았다.
+
+
+
+
+
+```python
+mr_mean = train_data[train_data['Title'] == 'Mr']['Age'].mean()
+miss_mean = train_data[train_data['Title'] == 'Miss']['Age'].mean()
+mrs_mean = train_data[train_data['Title'] == 'Mrs']['Age'].mean()
+master_mean = train_data[train_data['Title'] == 'Master']['Age'].mean()
+dr_mean = train_data[train_data['Title'] == 'Dr']['Age'].mean()s
+rev_mean = train_data[train_data['Title'] == 'Rev']['Age'].mean()
+major_mean = train_data[train_data['Title'] == 'Major']['Age'].mean()
+mlle_mean = train_data[train_data['Title'] == 'Mlle']['Age'].mean()
+col_mean = train_data[train_data['Title'] == 'Col']['Age'].mean()
+```
+
+`Age` 열의 비어있는곳은 어떻게 채워줄까 하다가, 만들어낸 `Title` data를 가지고 각 `Title`의 나이의 평균으로 넣어주는게 좋겠다고 생각하여, 존재하는 `Age`데이터를 이용해서 각각의 평균을 구해냈다. 하나밖에 없는 `Title`항목에 대해서는 굳이 평균을 만들지 않았다.
+
+
+
+```python
+array_data = np.array(train_data)
+
+# NaN값은 이렇게 접근해야 한다고 한다.
+for data in array_data:
+    if np.isnan(data[5]):
+        if data[12] == 'Mr':
+            data[5] = round(mr_mean)
+            #print("OK")
+        if data[12] == 'Miss':
+            data[5] = round(miss_mean)
+            #print("OK")
+        if data[12] == 'Mrs':
+            data[5] = round(mrs_mean)
+            #print("OK")
+        if data[12] == 'Master':
+            data[5] = round(master_mean)
+            #print("OK")
+        if data[12] == 'Dr':
+            data[5] = round(dr_mean)
+            #print("OK")
+        if data[12] == 'Rev':
+            data[5] = round(rev_mean)
+            #print("OK")
+        if data[12] == 'Major':
+            data[5] = round(major_mean)
+            #print("OK")
+        if data[12] == 'Mlle':
+            data[5] = round(mlle_mean)
+            #print("OK")
+        if data[12] == 'Col':
+            data[5] = round(col_mean)
+            #print("OK")
+```
+
+
+
+array로 바꿔서 처리하고나니까 `column name`이 다 없어져서 다시 정의해주고, 새로운 데이터프레임을 만들었다.
+
+```python
+column_list = ['PassengerId', 'Survived', 'Pclass', 'Name', 'Sex', 'Age', 'SibSp', 'Parch', 'Ticket', 'Fare', 'Cabin', 'Embarked', 'Title']
+new_data = pd.DataFrame(array_data, columns=column_list)
+new_data.info()
+```
+
+사진
+
+위에 보이는 것 처럼 `Age`에 있던 빈칸들이 다 채워졌다.
+
+
+
+이제 쓸만한 데이터만 남겨두기 위한 선별작업에 들어간다. 어떤 데이터를 쓰는게 좋을지 판별하기 위해, 서로간의 독립성을 판별하기 위해 correlation을 출력해보았다.
+
+
+
+knn
+
+decision tree
+
+random forest
+
+svm
 
