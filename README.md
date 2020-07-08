@@ -165,26 +165,26 @@ train_data = pd.read_csv("/home/ines/ml_assignment/train.csv")
 train_data.head()
 ```
 
-사진
+<p align="center"><img src="images/4.png" border="1"></p>
 
 ```python
 train_data.info()
 ```
 
-사진
+<p align="center"><img src="images/?.png" width="500" height="300" border="1"></p>
 
 ```python
 train_data.describe()
 ```
 
-사진
+<p align="center"><img src="images/6.png" border="1"></p>
 
 ```python
 train_data.hist(bins=50, figsize=(20,15))
 plt.show()
 ```
 
-사진
+<p align="center"><img src="images/?.png" width="500" height="300" border="1"></p>
 
 
 
@@ -198,7 +198,7 @@ makeTitle(train_data)
 
 이름에 붙어있는 `Mr`, `Mrs` 같은 수식어를 추출해서 `Title`이라는 새로운 Column을 Training data와 test_data에 만들었다. `value_counts()`로 확인한 결과는 다음과 같았다.
 
-
+<p align="center"><img src="images/5.png" width="500" height="300" border="1"></p>
 
 
 
@@ -273,11 +273,17 @@ new_data.info()
 
 
 
+logistic regression
+
 knn
 
 decision tree
 
 random forest
 
+- 스케일링 안해도 잘됨
+
 svm
+
+- 스케일링 중요
 
