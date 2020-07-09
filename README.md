@@ -23,7 +23,6 @@
   - Matplotlib
 - [Kaggle](kaggle_setup)
 - [Git](git_setup)
-- 비상한 두뇌
 
 
 
@@ -144,7 +143,9 @@ $ jupyter notebook
 
 Tip) `jupyter notebook`은 개발하기 좋은 환경을 제공하기 때문에, 더 편리하게 사용할 수 있도록 단축키를 익히는 것을 추천한다! [참고할 블로그](https://iludaslab.tistory.com/43)
 
- 자 이제 정말 시작이다. 
+ 
+
+자 이제 정말 시작이다. 
 
 우선 처음에는 사용할 `library`를 `import`해주는게 일반적이다.
 
@@ -160,8 +161,13 @@ from matplotlib import pyplot as plt
 
 우선 이 세가지만 `import`해놓았다. 어떤 알고리즘을 사용해서 모델을 학습할지 생각하기에 앞서 데이터 파악이 선행되어야한다.
 
+
+
+### 데이터 불러오고 살펴보기
+
 ```python
 train_data = pd.read_csv("/home/ines/ml_assignment/train.csv")
+test_data = pd.read_csv("/home/ines/titanic/dataset/test.csv")
 train_data.head()
 ```
 
@@ -169,9 +175,10 @@ train_data.head()
 
 ```python
 train_data.info()
+test_data.info()
 ```
 
-<p align="center"><img src="images/?.png" width="500" height="300" border="1"></p>
+<p align="center"><img src="images/7.png" width="500" height="300" border="1"></p>
 
 ```python
 train_data.describe()
@@ -179,14 +186,9 @@ train_data.describe()
 
 <p align="center"><img src="images/6.png" border="1"></p>
 
-```python
-train_data.hist(bins=50, figsize=(20,15))
-plt.show()
-```
-
-<p align="center"><img src="images/?.png" width="500" height="300" border="1"></p>
 
 
+### [새로운 Title column 만들기]([https://teddylee777.github.io/kaggle/kaggle(%EC%BA%90%EA%B8%80)-Titanic-%EC%83%9D%EC%A1%B4%EC%9E%90%EC%98%88%EC%B8%A1-81-%EC%9D%B4%EC%83%81-%EB%8B%AC%EC%84%B1%ED%95%98%EA%B8%B0](https://teddylee777.github.io/kaggle/kaggle(캐글)-Titanic-생존자예측-81-이상-달성하기)
 
 ```python
 def makeTitle(data):
@@ -200,18 +202,32 @@ makeTitle(train_data)
 
 <p align="center"><img src="images/5.png" width="500" height="300" border="1"></p>
 
+다음에는 `Train_data`에만 있는 `Survived` column을 `drop`시키고 `test_data` 와 결합시켜서 같이 가공한다.
+
+```python
+# 데이터 합쳐서 가공하기
+all_data = pd.concat([train_data, test_data], axis=0)
+all_data.info()
+```
+
+<p align="center"><img src="images/8.png" width="500" height="300" border="1"></p>
+
+위 정보에 따르면 `Age`, `Fare`, `Embark`, `Cabin`에서 결측값이 있다!
+
 
 
 ```python
-mr_mean = train_data[train_data['Title'] == 'Mr']['Age'].mean()
-miss_mean = train_data[train_data['Title'] == 'Miss']['Age'].mean()
-mrs_mean = train_data[train_data['Title'] == 'Mrs']['Age'].mean()
-master_mean = train_data[train_data['Title'] == 'Master']['Age'].mean()
-dr_mean = train_data[train_data['Title'] == 'Dr']['Age'].mean()s
-rev_mean = train_data[train_data['Title'] == 'Rev']['Age'].mean()
-major_mean = train_data[train_data['Title'] == 'Major']['Age'].mean()
-mlle_mean = train_data[train_data['Title'] == 'Mlle']['Age'].mean()
-col_mean = train_data[train_data['Title'] == 'Col']['Age'].mean()
+# 결측값을 채우기위한 평균값 준비
+mr_mean = all_data[train_data['Title'] == 'Mr']['Age'].mean()
+miss_mean = all_data[train_data['Title'] == 'Miss']['Age'].mean()
+mrs_mean = all_data[train_data['Title'] == 'Mrs']['Age'].mean()
+master_mean = all_data[train_data['Title'] == 'Master']['Age'].mean()
+dr_mean = all_data[train_data['Title'] == 'Dr']['Age'].mean()
+rev_mean = all_data[train_data['Title'] == 'Rev']['Age'].mean()
+major_mean = all_data[train_data['Title'] == 'Major']['Age'].mean()
+mlle_mean = all_data[train_data['Title'] == 'Mlle']['Age'].mean()
+col_mean = all_data[train_data['Title'] == 'Col']['Age'].mean()
+age_mean = all_data['Age'].mean()
 ```
 
 `Age` 열의 비어있는곳은 어떻게 채워줄까 하다가, 만들어낸 `Title` data를 가지고 각 `Title`의 나이의 평균으로 넣어주는게 좋겠다고 생각하여, 존재하는 `Age`데이터를 이용해서 각각의 평균을 구해냈다. 하나밖에 없는 `Title`항목에 대해서는 굳이 평균을 만들지 않았다.
@@ -219,37 +235,40 @@ col_mean = train_data[train_data['Title'] == 'Col']['Age'].mean()
 
 
 ```python
-array_data = np.array(train_data)
+all_array_data = np.array(all_data)
 
 # NaN값은 이렇게 접근해야 한다고 한다.
-for data in array_data:
-    if np.isnan(data[5]):
-        if data[12] == 'Mr':
-            data[5] = round(mr_mean)
+for data in all_array_data:
+    if np.isnan(data[4]):
+        if data[11] == 'Mr':
+            data[4] = round(mr_mean)
             #print("OK")
-        if data[12] == 'Miss':
-            data[5] = round(miss_mean)
+        elif data[11] == 'Miss':
+            data[4] = round(miss_mean)
             #print("OK")
-        if data[12] == 'Mrs':
-            data[5] = round(mrs_mean)
+        elif data[11] == 'Mrs':
+            data[4] = round(mrs_mean)
             #print("OK")
-        if data[12] == 'Master':
-            data[5] = round(master_mean)
+        elif data[11] == 'Master':
+            data[4] = round(master_mean)
             #print("OK")
-        if data[12] == 'Dr':
-            data[5] = round(dr_mean)
+        elif data[11] == 'Dr':
+            data[4] = round(dr_mean)
             #print("OK")
-        if data[12] == 'Rev':
-            data[5] = round(rev_mean)
+        elif data[11] == 'Rev':
+            data[4] = round(rev_mean)
             #print("OK")
-        if data[12] == 'Major':
-            data[5] = round(major_mean)
+        elif data[11] == 'Major':
+            data[4] = round(major_mean)
             #print("OK")
-        if data[12] == 'Mlle':
-            data[5] = round(mlle_mean)
+        elif data[11] == 'Mlle':
+            data[4] = round(mlle_mean)
             #print("OK")
-        if data[12] == 'Col':
-            data[5] = round(col_mean)
+        elif data[11] == 'Col':
+            data[4] = round(col_mean)
+            #print("OK")
+        else:
+            data[4] = round(age_mean)
             #print("OK")
 ```
 
@@ -258,32 +277,223 @@ for data in array_data:
 array로 바꿔서 처리하고나니까 `column name`이 다 없어져서 다시 정의해주고, 새로운 데이터프레임을 만들었다.
 
 ```python
-column_list = ['PassengerId', 'Survived', 'Pclass', 'Name', 'Sex', 'Age', 'SibSp', 'Parch', 'Ticket', 'Fare', 'Cabin', 'Embarked', 'Title']
-new_data = pd.DataFrame(array_data, columns=column_list)
-new_data.info()
+column_list = ['PassengerId', 'Pclass', 'Name', 'Sex', 'Age', 'SibSp', 'Parch', 'Ticket', 'Fare', 'Cabin', 'Embarked', 'Title']
+new_all_data = pd.DataFrame(all_array_data, columns=column_list)
+
+# 나머지 남아있는 결측값은 결측값 위치의 바로 위의 값으로 결측값을 채우는 방법으로!
+new_all_data['Embarked'] = new_all_data['Embarked'].fillna(method='pad')
+new_all_data['Fare'] = new_all_data['Fare'].fillna(method='pad')
+
+# 전부 채워진걸 확인
+new_all_data.info()
 ```
 
-사진
+<p align="center"><img src="images/9.png" width="500" height="300" border="1"></p>
 
-위에 보이는 것 처럼 `Age`에 있던 빈칸들이 다 채워졌다.
-
-
-
-이제 쓸만한 데이터만 남겨두기 위한 선별작업에 들어간다. 어떤 데이터를 쓰는게 좋을지 판별하기 위해, 서로간의 독립성을 판별하기 위해 correlation을 출력해보았다.
+위에 보이는 것 처럼 결측값들은 전부 없어졌다.
 
 
 
-logistic regression
+### 데이터 매핑
 
-knn
+이제 `Training`에 사용할 데이터를 매핑하고, 나머지는 `drop`시키는 작업이 필요하다
 
-decision tree
+```python
+# 연령대 별로 나누기
+for data in [new_all_data]:
+    data.loc[data['Age'] <= 10, 'Age'] = 0,
+    data.loc[(data['Age'] > 10) & (data['Age'] <= 20), 'Age'] = 1,
+    data.loc[(data['Age'] > 20) & (data['Age'] <= 30), 'Age'] = 2,
+    data.loc[(data['Age'] > 30) & (data['Age'] <= 40), 'Age'] = 3,
+    data.loc[(data['Age'] > 40) & (data['Age'] <= 50), 'Age'] = 4,
+    data.loc[(data['Age'] > 50) & (data['Age'] <= 60), 'Age'] = 5,
+    data.loc[(data['Age'] > 60) & (data['Age'] <= 70), 'Age'] = 6,
+    data.loc[data['Age'] > 70, 'Age'] = 7
+```
 
-random forest
+- `Age`는 연령대별로 Interval을 주어 나누었다.
 
-- 스케일링 안해도 잘됨
+  
 
-svm
+```python
+# 클래스별 Fare의 평균값을 이용해서 경계만들어서 매핑
+p1 = new_all_data[new_all_data['Pclass']==1]
+p2 = new_all_data[new_all_data['Pclass']==2]
+p3 = new_all_data[new_all_data['Pclass']==3]
+p1_mean = p1['Fare'].mean()
+p2_mean = p2['Fare'].mean()
+p3_mean = p3['Fare'].mean()
+r1 = (p2_mean - p3_mean) / 2
+r2 = (p1_mean - p2_mean) / 2
 
-- 스케일링 중요
+for data in [new_all_data]:
+    data.loc[data['Fare'] <= p3_mean+r1, 'Fare'] = 0,
+    data.loc[(data['Fare'] > p3_mean+r1) & (data['Fare'] <= p2_mean+r2), 'Fare'] = 1,
+    data.loc[data['Fare'] > p2_mean+r2, 'Fare'] = 2
+```
+
+- `Fare`는 각각 `Pclass`와 연관성을 가지고있어서 각 `Pclass`에서 `Fare`의 평균값을 구해서 Interval을 나누는 용도로 사용하였다.
+
+
+
+```python
+# 성별 매핑
+for data in [new_all_data]:
+    data.loc[data['Sex'] == 'male', 'Sex'] = 0,
+    data.loc[data['Sex'] == 'female', 'Sex'] = 1
+```
+
+- `Sex`은 간단하게 0과 1로 나눠주었다.
+
+
+
+```python
+# Embarked 매핑
+for data in [new_all_data]:
+    data.loc[data['Embarked'] == 'S', 'Embarked'] = 0,
+    data.loc[data['Embarked'] == 'C', 'Embarked'] = 1,
+    data.loc[data['Embarked'] == 'Q', 'Embarked'] = 2
+```
+
+- `Embarked`도 간단하게 3개로 나눠주었다.
+
+
+
+```python
+# 타이틀을 매핑, 개수가 작은 Title들은 나머지와 묶어서 처리
+for data in [new_all_data]:
+    data.loc[data['Title'] == 'Mr', 'Title'] = 0,
+    data.loc[data['Title'] == 'Miss', 'Title'] = 1,
+    data.loc[data['Title'] == 'Mrs', 'Title'] = 2
+    data.loc[data['Title'] == 'Master', 'Title'] = 3,
+    data.loc[data['Title'] == 'Dr', 'Title'] = 4,
+    data.loc[data['Title'] == 'Rev', 'Title'] = 4,
+    data.loc[data['Title'] == 'Col', 'Title'] = 4,
+    data.loc[data['Title'] == 'Major', 'Title'] = 4,
+    data.loc[data['Title'] == 'Sir', 'Title'] = 4,
+    data.loc[data['Title'] == 'Countess', 'Title'] = 4,
+    data.loc[data['Title'] == 'Don', 'Title'] = 4,
+    data.loc[data['Title'] == 'Jonkheer', 'Title'] = 4,
+    data.loc[data['Title'] == 'Lady', 'Title'] = 4,
+    data.loc[data['Title'] == 'Ms', 'Title'] = 4,
+    data.loc[data['Title'] == 'Capt', 'Title'] = 4,
+    data.loc[data['Title'] == 'Mme', 'Title'] = 4
+    data.loc[data['Title'] == 'Mlle', 'Title'] = 4
+    data.loc[data['Title'] == 'Dona', 'Title'] = 4
+```
+
+- 처음에 만들었던 `Title`같은 경우는 값이 많은 것들은 단독으로 매핑하고, 나머지 값이 적은 것들은 묶어서 하나의 Class로 처리하였다.
+
+
+
+```python
+new_all_data.head()
+```
+
+<p align="center"><img src="images/10.png" border="1"></p>
+
+이제 Training에 사용되지 않을 Feature들을 제거한다.
+
+```python
+# 매핑을 마쳤으니 나머지 못쓸것같은 데이터들은 다 버린다.
+drop_list = ['Ticket', 'SibSp', 'Parch', 'Name', 'Cabin', 'PassengerId']
+
+# 아까 묶어놨던 데이터를 다시 분리한다.
+final_train_data = new_all_data[new_all_data['PassengerId']<=891]
+final_test_data = new_all_data[new_all_data['PassengerId']>891]
+
+final_train_data = final_train_data.drop(drop_list, axis=1)
+final_test_data = final_test_data.drop(drop_list, axis=1)
+
+final_train_data.info()
+final_test_data.info()
+```
+
+<p align="center"><img src="images/11.png" width="500" height="300" border="1"></p>
+
+
+
+### Training
+
+```python
+from sklearn.model_selection import cross_val_score
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
+```
+
+어떤 모델을 쓸까하다가 여러가지를 써보고 성능을 비교한 후, 가장 좋은 Model로 사용하기로 했다.
+
+```python
+label_data = pd.read_csv("/home/ines/titanic/dataset/test.csv")
+
+label = label_data['Survived']
+
+# knn은 hyperparameter를 바꿔가며 해봤으니 그저그런 성능
+knn_clf = KNeighborsClassifier(n_neighbors = 8)
+score = cross_val_score(knn_clf, final_train_data, label, cv=5, scoring='accuracy')
+print(score)
+
+# estimator의 개수가 60개를 넘어가면서 점차 성능이 감소
+rf_clf = RandomForestClassifier(n_estimators=60)
+score = cross_val_score(rf_clf, final_train_data, label, cv=5, scoring='accuracy')
+print(score)
+
+# C가 1~300까지 어느정도 일정하게 유지되다가 그이상 더 커지거나 작아지면 내려감
+# C가 40 즈음에서 가장 좋은 성적
+svm_clf = SVC(C=40)
+score = cross_val_score(svm_clf, final_train_data, label, cv=5, scoring='accuracy')
+print(score)
+```
+
+- label을 생성해주고, 모델들을 `Cross_val_score`을 이용해서 성능을 평가한다.
+
+  
+
+각각의 모델이 받은 점수는 다음과 같았다.
+
+```
+KNN
+[0.81005587 0.78651685 0.76404494 0.78651685 0.80898876]
+
+Random Forest
+[0.81564246 0.78651685 0.82022472 0.7752809  0.83146067]
+
+SVM
+[0.83798883 0.80898876 0.83707865 0.78089888 0.86516854]
+```
+
+
+
+### SVM으로 제출할 파일 만들기
+
+svm이 가장 좋은 성능을 보였기 때문에, 이 모델을 이용해서 Prediction을 한다.
+
+```python
+svm_clf.fit(final_train_data, label)
+predictions = svm_clf.predict(final_test_data)
+```
+
+이제 만들어진 Prediction으로 제출용 파일 `submission.csv`를 만든다.
+
+```python
+submission = pd.DataFrame({"PassengerId" : test_data['PassengerId'],
+                          "Survived" : predictions})
+submission.to_csv('submission.csv', index=False)
+submission = pd.read_csv('submission.csv')
+submission.head()
+```
+
+위의 코드를 실행하면 자신의 코드가 있는 폴더에 `submission.csv`가 만들어진걸 확인할 수 있다!
+
+
+
+# Submission file 제출
+
+<p align="center"><img src="images/12.png" border="1"></p>
+
+- 여기에서 `Submit Predictions` 클릭한 뒤, 파일을 올리고, `Make Submission`을 클릭하면 다음과 같이 점수를 볼 수가 있다.
+
+<p align="center"><img src="images/14.png" border="1"></p>
 
