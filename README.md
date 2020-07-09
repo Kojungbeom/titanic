@@ -188,7 +188,9 @@ train_data.describe()
 
 
 
-### [새로운 Title column 만들기]([https://teddylee777.github.io/kaggle/kaggle(%EC%BA%90%EA%B8%80)-Titanic-%EC%83%9D%EC%A1%B4%EC%9E%90%EC%98%88%EC%B8%A1-81-%EC%9D%B4%EC%83%81-%EB%8B%AC%EC%84%B1%ED%95%98%EA%B8%B0](https://teddylee777.github.io/kaggle/kaggle(캐글)-Titanic-생존자예측-81-이상-달성하기)
+### 새로운 Title column 만들기
+
+[이 링크를 참고](https://teddylee777.github.io/kaggle/kaggle(%EC%BA%90%EA%B8%80)-Titanic-%EC%83%9D%EC%A1%B4%EC%9E%90%EC%98%88%EC%B8%A1-81-%EC%9D%B4%EC%83%81-%EB%8B%AC%EC%84%B1%ED%95%98%EA%B8%B0](https://teddylee777.github.io/kaggle/kaggle(캐글)-Titanic-생존자예측-81-이상-달성하기)
 
 ```python
 def makeTitle(data):
