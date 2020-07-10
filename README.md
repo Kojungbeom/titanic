@@ -427,24 +427,75 @@ from sklearn.svm import SVC
 
 어떤 모델을 쓸까하다가 여러가지를 써보고 성능을 비교한 후, 가장 좋은 Model로 사용하기로 했다.
 
+
+
+```python
+from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import KFold
+
+param_grid = {
+    'n_estimators': [200, 300, 400, 500],
+    'max_depth': [6, 20, 30, 40],
+    'min_samples_leaf' : [3,5,7,10],
+    'min_samples_split' : [2,3,5,10]
+}
+kf = KFold(random_state=42,
+           n_splits=10,
+           shuffle=True,
+          )
+rf_grid = GridSearchCV(rf_clf2, param_grid=param_grid, scoring='accuracy')
+rf_grid.fit(final_train_data, label)
+rf_grid.best_params_
+
+svm_clf = SVC()
+param_svm_grid = {
+    'degree': [1, 10, 20, 30],
+    'C' : [0.1, 10, 20, 30, 40, 70, 100]
+}
+svm_grid = GridSearchCV(svm_clf, param_grid=param_svm_grid, scoring='accuracy')
+svm_grid.fit(final_train_data, label)
+svm_grid.best_params_
+
+
+gbrt = GradientBoostingClassifier(random_state=42)
+param_gbrt_grid = {
+    'n_estimators': [100, 200, 300],
+    'max_depth': [5, 10, 15, 20],
+    'min_samples_leaf' : [3,5,7,9],
+    'min_samples_split' : [2,4,6,8],
+    'learning_rate' : [0.1, 1]
+}
+gbrt_grid = GridSearchCV(gbrt, param_grid=param_gbrt_grid, scoring='accuracy')
+gbrt_grid.fit(final_train_data, label)
+gbrt_grid.best_params_
+
+```
+
+- 학습하기전 Random Forest에서 이 데이터셋에 대한 최적의 Hyperparameter를 찾기위해 GridSearch를 사용했다.
+
+
+
 ```python
 label_data = pd.read_csv("/home/ines/titanic/dataset/test.csv")
 
 label = label_data['Survived']
 
-# knn은 hyperparameter를 바꿔가며 해봤으니 그저그런 성능
 knn_clf = KNeighborsClassifier(n_neighbors = 8)
 score = cross_val_score(knn_clf, final_train_data, label, cv=5, scoring='accuracy')
 print(score)
 
-# estimator의 개수가 60개를 넘어가면서 점차 성능이 감소
-rf_clf = RandomForestClassifier(n_estimators=60)
+# GridSearch 결과를 토대로 Hyperparameter 입력
+rf_clf = RandomForestClassifier(n_estimators=400, max_depth=20, max_leaf_nodes=5, min_samples_split=2)
 score = cross_val_score(rf_clf, final_train_data, label, cv=5, scoring='accuracy')
 print(score)
 
-# C가 1~300까지 어느정도 일정하게 유지되다가 그이상 더 커지거나 작아지면 내려감
-# C가 40 즈음에서 가장 좋은 성적
-svm_clf = SVC(C=40)
+# GridSearch 결과를 토대로 Hyperparameter 입력
+gbrt = GradientBoostingClassifier(learning_rate=0.1, max_depth=5, min_samples_leaf=9, min_samples_split=2, n_estimators=100)
+gbrt.fit(final_train_data, label)
+gbrt.score(final_train_data, label)
+
+# GridSearch 결과를 토대로 Hyperparameter 입력
+svm_clf = SVC(C=10, degree=1)
 score = cross_val_score(svm_clf, final_train_data, label, cv=5, scoring='accuracy')
 print(score)
 ```
@@ -460,24 +511,27 @@ KNN
 [0.81005587 0.78651685 0.76404494 0.78651685 0.80898876]
 
 Random Forest
-[0.81564246 0.78651685 0.82022472 0.7752809  0.83146067]
+[0.81564246 0.80337079 0.79775281 0.79213483 0.80337079]
+
+GradientBoostingClassifier
+[0.8529741863075196]
 
 SVM
-[0.83798883 0.80898876 0.83707865 0.78089888 0.86516854]
+[0.82681564 0.82022472 0.83146067 0.78651685 0.86516854]
 ```
 
 
 
-### SVM으로 제출할 파일 만들기
+### SVM, Random Forest, GradientBoosting으로 제출할 파일 만들기
 
-svm이 가장 좋은 성능을 보였기 때문에, 이 모델을 이용해서 Prediction을 한다.
+svm과 Random Forest, GradientBoosting 각각에 대한 파일을 만들어서 여러번 제출해보았다.
 
 ```python
 svm_clf.fit(final_train_data, label)
 predictions = svm_clf.predict(final_test_data)
 ```
 
-이제 만들어진 Prediction으로 제출용 파일 `submission.csv`를 만든다.
+이제 만들어진 Prediction으로 제출용 파일 `submission.csv`, `submission_rf.csv`, `submission_gbf`를 만든다.
 
 ```python
 submission = pd.DataFrame({"PassengerId" : test_data['PassengerId'],
@@ -485,17 +539,48 @@ submission = pd.DataFrame({"PassengerId" : test_data['PassengerId'],
 submission.to_csv('submission.csv', index=False)
 submission = pd.read_csv('submission.csv')
 submission.head()
+
+rf_clf.fit(final_train_data, label)
+predictions_rf = rf_clf.predict(final_test_data)
+submission_rf = pd.DataFrame({"PassengerId" : test_data['PassengerId'],
+                          "Survived" : predictions_rf})
+submission_rf.to_csv('submission_rf.csv', index=False)
+submission_rf = pd.read_csv('submission_rf.csv')
+submission_rf.head()
+
+gbrt.fit(final_train_data, label)
+predictions_gbf = gbrt.predict(final_test_data)
+submission_gbf = pd.DataFrame({"PassengerId" : test_data['PassengerId'],
+                          "Survived" : predictions_gbf})
+submission_gbf.to_csv('submission_gbf.csv', index=False)
+submission_gbf = pd.read_csv('submission_gbf.csv')
+submission_gbf.head()
 ```
 
 위의 코드를 실행하면 자신의 코드가 있는 폴더에 `submission.csv`가 만들어진걸 확인할 수 있다!
 
 
 
-# Submission file 제출
+### Submission file 제출
 
 <p align="center"><img src="images/12.png" border="1"></p>
 
 - 여기에서 `Submit Predictions` 클릭한 뒤, 파일을 올리고, `Make Submission`을 클릭하면 다음과 같이 점수를 볼 수가 있다.
 
 <p align="center"><img src="images/14.png" border="1"></p>
+
+세가지를 전부 올려 테스트를 해본 결과, 다음과 같은 결과가 나왔다.
+
+```
+Gradient Boosting Score
+-> 0.75598
+
+Random Forest Score
+-> 0.7751
+
+SVM Score
+-> 0.78468
+```
+
+
 
