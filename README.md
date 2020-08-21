@@ -1,4 +1,4 @@
-# Titanic
+# Titanic 바뀌나 테스트
 [Kaggle](https://www.kaggle.com/)에 있는 ["Titanic: Machine Learning from Disaster"](https://www.kaggle.com/c/titanic) 데이터를 가지고 어떤 종류의 사람들이 살아남는지 예측하기
 
 이 프로젝트는 `Ubuntu 18.04LTS` 환경에서 제작했습니다.
