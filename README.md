@@ -107,7 +107,7 @@ $ pip install kaggle
 
 
 ```
-$ chmod 600 /home/ines/.kaggle/kaggle.json
+$ chmod 600 "path to kaggle.json"
 $ kaggle competitions list
 # Home 디렉토리로 이동한다.
 $ cd
@@ -166,8 +166,8 @@ from matplotlib import pyplot as plt
 ### 데이터 불러오고 살펴보기
 
 ```python
-train_data = pd.read_csv("/home/ines/ml_assignment/train.csv")
-test_data = pd.read_csv("/home/ines/titanic/dataset/test.csv")
+train_data = pd.read_csv("path to train.csv")
+test_data = pd.read_csv("path to test.csv")
 train_data.head()
 ```
 
@@ -476,7 +476,7 @@ gbrt_grid.best_params_
 
 
 ```python
-label_data = pd.read_csv("/home/ines/titanic/dataset/test.csv")
+label_data = pd.read_csv("path to test.csv")
 
 label = label_data['Survived']
 
